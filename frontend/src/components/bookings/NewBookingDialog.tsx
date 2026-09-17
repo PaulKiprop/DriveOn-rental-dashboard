@@ -8,9 +8,14 @@ interface NewBookingDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onCreated: () => void;
+  initialValues?: {
+    vehicleId?: number;
+    startDate?: string;
+    endDate?: string;
+  };
 }
 
-export default function NewBookingDialog({ open, onOpenChange, onCreated }: NewBookingDialogProps) {
+export default function NewBookingDialog({ open, onOpenChange, onCreated, initialValues }: NewBookingDialogProps) {
   const [vehicleId, setVehicleId] = useState('');
   const [customerId, setCustomerId] = useState('');
   const [startDate, setStartDate] = useState('');
@@ -23,6 +28,15 @@ export default function NewBookingDialog({ open, onOpenChange, onCreated }: NewB
   const [checkingAvailability, setCheckingAvailability] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!open || !initialValues) return;
+    setVehicleId(initialValues.vehicleId ? String(initialValues.vehicleId) : '');
+    setStartDate(initialValues.startDate || '');
+    setEndDate(initialValues.endDate || '');
+    setAvailabilityResult(null);
+    setError(null);
+  }, [open, initialValues]);
 
   useEffect(() => {
     if (!open || vehicleOptions.length) return;

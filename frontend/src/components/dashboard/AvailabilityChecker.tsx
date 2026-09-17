@@ -6,6 +6,7 @@ import { availability, vehicles as vehiclesApi } from '../../services/api';
 import { formatDate, daysBetween } from '../../lib/utils';
 import { CheckCircle, XCircle, Search, Loader2 } from 'lucide-react';
 import { AvailabilityResult, Vehicle } from '../../types/index';
+import NewBookingDialog from '../bookings/NewBookingDialog';
 
 export default function AvailabilityChecker() {
   const [vehicleId, setVehicleId] = useState('');
@@ -15,6 +16,7 @@ export default function AvailabilityChecker() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [bookingOpen, setBookingOpen] = useState(false);
 
   useEffect(() => {
     const fetchVehicles = async () => {
@@ -111,9 +113,14 @@ export default function AvailabilityChecker() {
             )}
             <div>
               {result.available ? (
-                <p className="font-medium">
-                  ✅ Available! This vehicle is free from {formatDate(startDate)} to {formatDate(endDate)}. ({daysBetween(startDate, endDate)} nights)
-                </p>
+                <div className="flex flex-wrap items-center justify-between gap-3 w-full">
+                  <p className="font-medium">
+                    ✅ Available! This vehicle is free from {formatDate(startDate)} to {formatDate(endDate)}. ({daysBetween(startDate, endDate)} nights)
+                  </p>
+                  <Button type="button" onClick={() => setBookingOpen(true)} className="bg-green-600 text-white hover:bg-green-700">
+                    Add booking
+                  </Button>
+                </div>
               ) : (
                 <p className="font-medium">
                   ❌ Not Available — Conflicting booking by {result.conflict?.customerName} from {formatDate(result.conflict?.startDate || '')} to {formatDate(result.conflict?.endDate || '')} · Status: {result.conflict?.status}
@@ -123,6 +130,12 @@ export default function AvailabilityChecker() {
           </div>
         )}
       </CardContent>
+      <NewBookingDialog
+        open={bookingOpen}
+        onOpenChange={setBookingOpen}
+        onCreated={() => setBookingOpen(false)}
+        initialValues={{ vehicleId: Number(vehicleId), startDate, endDate }}
+      />
     </Card>
   );
 }
