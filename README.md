@@ -42,8 +42,16 @@ docker compose --profile tools up -d prisma-studio
 ## Local Development (without Docker)
 
 ### Prerequisites
-- Node.js 20+
+- Node.js 24.21.0 (or a supported Node 22.12+ / 24.x version; `.nvmrc` pins the project version)
 - PostgreSQL 16 running locally
+
+Use the pinned runtime before installing packages:
+
+```bash
+nvm use
+```
+
+The project uses lockfiles, so use `npm ci` for repeatable installs. npm is configured to reject unsupported Node versions instead of attempting an unreliable install.
 
 ### Backend
 

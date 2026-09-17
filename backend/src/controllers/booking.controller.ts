@@ -4,6 +4,72 @@ import { AppError, asyncHandler } from '../utils/errors';
 
 const prisma = new PrismaClient();
 
+export const create = asyncHandler(async (req: Request, res: Response) => {
+  const { vehicleId, customerId, startDate, endDate, notes } = req.body;
+  const parsedVehicleId = Number(vehicleId);
+  const parsedCustomerId = Number(customerId);
+  const start = new Date(String(startDate));
+  const end = new Date(String(endDate));
+
+  if (!Number.isInteger(parsedVehicleId) || !Number.isInteger(parsedCustomerId)) {
+    throw new AppError('A valid vehicle and customer are required', 400);
+  }
+
+  if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+    throw new AppError('Invalid date format', 400);
+  }
+
+  if (start >= end) {
+    throw new AppError('Return date must be after the pickup date', 400);
+  }
+
+  const [vehicle, customer] = await Promise.all([
+    prisma.vehicle.findUnique({ where: { id: parsedVehicleId } }),
+    prisma.customer.findUnique({ where: { id: parsedCustomerId } })
+  ]);
+
+  if (!vehicle) throw new AppError('Vehicle not found', 404);
+  if (!customer) throw new AppError('Customer not found', 404);
+  if (vehicle.status === 'Maintenance') {
+    throw new AppError('This vehicle is in maintenance and cannot be booked', 409);
+  }
+
+  const conflict = await prisma.booking.findFirst({
+    where: {
+      vehicleId: parsedVehicleId,
+      status: { not: 'Cancelled' },
+      NOT: {
+        OR: [
+          { endDate: { lte: start } },
+          { startDate: { gte: end } }
+        ]
+      }
+    },
+    include: { customer: true }
+  });
+
+  if (conflict) {
+    throw new AppError(
+      `Vehicle is unavailable: it is booked by ${conflict.customer.fullName} from ${conflict.startDate.toISOString().slice(0, 10)} to ${conflict.endDate.toISOString().slice(0, 10)}`,
+      409
+    );
+  }
+
+  const booking = await prisma.booking.create({
+    data: {
+      vehicleId: parsedVehicleId,
+      customerId: parsedCustomerId,
+      startDate: start,
+      endDate: end,
+      notes: typeof notes === 'string' && notes.trim() ? notes.trim() : null,
+      status: 'Pending'
+    },
+    include: { vehicle: true, customer: true }
+  });
+
+  res.status(201).json(booking);
+});
+
 export const getAll = asyncHandler(async (req: Request, res: Response) => {
   const { status, search, sortBy, order } = req.query;
 

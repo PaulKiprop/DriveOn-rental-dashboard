@@ -1,5 +1,5 @@
 # Build stage
-FROM node:22-bookworm-slim AS builder
+FROM node:24.21.0-bookworm-slim AS builder
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci

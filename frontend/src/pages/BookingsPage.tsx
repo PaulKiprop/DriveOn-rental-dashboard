@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { List, GanttChartSquare, ArrowUpDown, Search } from 'lucide-react';
+import { List, GanttChartSquare, ArrowUpDown, Plus, Search } from 'lucide-react';
 import BookingTable from '../components/bookings/BookingTable';
 import BookingTimeline from '../components/bookings/BookingTimeline';
 import BookingDetail from '../components/bookings/BookingDetail';
+import NewBookingDialog from '../components/bookings/NewBookingDialog';
 import { bookings as bookingsApi } from '../services/api';
 
 const BookingsPage: React.FC = () => {
@@ -15,6 +16,8 @@ const BookingsPage: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [viewMode, setViewMode] = useState<'table' | 'timeline'>('table');
   const [selectedBooking, setSelectedBooking] = useState<any | null>(null);
+  const [newBookingOpen, setNewBookingOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -31,7 +34,7 @@ const BookingsPage: React.FC = () => {
           status: statusFilter !== 'all' ? statusFilter : undefined,
           search: debouncedSearch,
           sortBy,
-          sortOrder
+          order: sortOrder
         });
         setBookings(data);
       } catch (error) {
@@ -42,7 +45,7 @@ const BookingsPage: React.FC = () => {
     };
     
     fetchBookings();
-  }, [statusFilter, debouncedSearch, sortBy, sortOrder]);
+  }, [statusFilter, debouncedSearch, sortBy, sortOrder, refreshKey]);
 
   return (
     <div className="space-y-6">
@@ -91,6 +94,9 @@ const BookingsPage: React.FC = () => {
         </button>
 
         <div className="ml-auto flex gap-2">
+          <button onClick={() => setNewBookingOpen(true)} className="h-9 flex items-center rounded-md bg-blue-600 px-3 text-sm font-medium text-white hover:bg-blue-700">
+            <Plus className="mr-1.5 h-4 w-4" /> New booking
+          </button>
           <button 
             onClick={() => setViewMode('table')}
             className={`h-9 flex items-center justify-center rounded-md border px-3 text-sm ${viewMode === 'table' ? 'bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600' : 'border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900'} dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800`}
@@ -115,6 +121,7 @@ const BookingsPage: React.FC = () => {
       {selectedBooking && (
         <BookingDetail booking={selectedBooking} onClose={() => setSelectedBooking(null)} />
       )}
+      <NewBookingDialog open={newBookingOpen} onOpenChange={setNewBookingOpen} onCreated={() => setRefreshKey((key) => key + 1)} />
     </div>
   );
 };

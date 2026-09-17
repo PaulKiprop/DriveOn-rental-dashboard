@@ -75,6 +75,8 @@ export const bookings = {
   getOne: (id: number) => api.get<any>(`/bookings/${id}`),
   getById: (id: number) => api.get<any>(`/bookings/${id}`),
   getTimeline: () => api.get<any[]>('/bookings/timeline'),
+  create: (data: { vehicleId: number; customerId: number; startDate: string; endDate: string; notes?: string }) =>
+    api.post<any>('/bookings', data),
 };
 
 // Customers
