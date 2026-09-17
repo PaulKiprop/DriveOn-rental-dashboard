@@ -1,0 +1,66 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: driveon_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: driveon
+      POSTGRES_USER: driveon
+      POSTGRES_PASSWORD: driveon_secret
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U driveon -d driveon"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: driveon_backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://driveon:driveon_secret@db:5432/driveon
+      JWT_SECRET: driveon-jwt-super-secret-key-2026
+      PORT: 5000
+      NODE_ENV: production
+    ports:
+      - "5000:5000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  prisma-studio:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: driveon_prisma_studio
+    restart: unless-stopped
+    profiles: ["tools"]
+    command: ["npx", "prisma", "studio", "--browser", "none", "--hostname", "0.0.0.0"]
+    environment:
+      DATABASE_URL: postgresql://driveon:driveon_secret@db:5432/driveon
+    ports:
+      - "5555:5555"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: driveon_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
+    name: driveon_pgdata
