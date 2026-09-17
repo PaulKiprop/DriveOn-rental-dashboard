@@ -77,15 +77,15 @@ const VehicleDetail: React.FC<VehicleDetailProps> = ({ vehicle, onClose }) => {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg">
                     <div className="flex items-center text-gray-500 mb-1"><Euro className="w-4 h-4 mr-1" /> Earnings</div>
-                    <div className="text-xl font-bold dark:text-white">{formatCurrency(detailData?.totalEarnings || 0)}</div>
+                    <div className="text-xl font-bold dark:text-white">{formatCurrency(detailData?.stats?.totalEarnings || 0)}</div>
                   </div>
                   <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg">
                     <div className="flex items-center text-gray-500 mb-1"><TrendingUp className="w-4 h-4 mr-1" /> Utilization</div>
-                    <div className="text-xl font-bold dark:text-white">{detailData?.utilizationRate?.toFixed(1) || '0.0'}%</div>
+                    <div className="text-xl font-bold dark:text-white">{detailData?.stats?.utilizationRate?.toFixed(1) || '0.0'}%</div>
                   </div>
                   <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg">
                     <div className="flex items-center text-gray-500 mb-1"><Calendar className="w-4 h-4 mr-1" /> Bookings</div>
-                    <div className="text-xl font-bold dark:text-white">{detailData?.totalBookings || 0}</div>
+                    <div className="text-xl font-bold dark:text-white">{detailData?.stats?.totalBookings || 0}</div>
                   </div>
                   <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg">
                     <div className="flex items-center text-gray-500 mb-1">Daily Rate</div>

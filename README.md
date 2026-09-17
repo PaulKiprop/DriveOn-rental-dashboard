@@ -15,7 +15,6 @@ DriveOn is an authenticated admin dashboard for managing a single-branch car-ren
 - PostgreSQL 16
 - `nvm` is recommended; `.nvmrc` pins the project runtime to Node 24.21.0.
 
-The repository includes lockfiles and `.npmrc` enables strict engine checks. Use `npm ci` rather than `npm install` for repeatable installs.
 
 ## Run with Docker
 
@@ -147,14 +146,3 @@ DriveOn-rental-dashboard/
 ├── backend/           # Express API, Prisma schema, and seed data
 └── frontend/          # React + Vite dashboard
 ```
-
-## Security and maintenance
-
-Run audits from each application directory after dependency changes:
-
-```bash
-cd backend && npm audit
-cd frontend && npm audit
-```
-
-Do not commit `.env` files or production secrets. The checked-in `.env.example` is a template only.
